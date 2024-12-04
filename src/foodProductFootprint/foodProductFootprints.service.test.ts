@@ -8,6 +8,7 @@ import { IngredientsService } from "../ingredient/ingredients.service";
 import { IngredientFootprint } from "../ingredientFootprint/ingredientFootprint.entity";
 import { IngredientFootprintsService } from "../ingredientFootprint/ingredientFootprints.service";
 import { getTestEmissionFactor, getTestFoodProduct, getTestIngredient } from "../seed-dev-data";
+import { UnitConverterService } from "../unitConverter/unitConverter.service";
 import { FoodProductFootprint } from "./foodProductFootprint.entity";
 import { FoodProductFootprintsService } from "./foodProductFootprints.service";
 
@@ -16,6 +17,7 @@ let ingredientFootPrintsService: IngredientFootprintsService;
 let foodProductsService: FoodProductsService;
 let foodProductFootPrintsService: FoodProductFootprintsService;
 let carbonEmissionFactorsService: CarbonEmissionFactorsService;
+let unitConverterService: UnitConverterService;
 
 let savedChickenIngredient: Ingredient | null;
 let savedFlourIngredient: Ingredient | null;
@@ -32,10 +34,13 @@ beforeAll(async () => {
     carbonEmissionFactorsService = new CarbonEmissionFactorsService(
         dataSource.getRepository(CarbonEmissionFactor)
     );
+    unitConverterService = new UnitConverterService();
+
     ingredientFootPrintsService = new IngredientFootprintsService(
         dataSource.getRepository(IngredientFootprint),
         ingredientService,
-        carbonEmissionFactorsService
+        carbonEmissionFactorsService,
+        unitConverterService
     );
     foodProductsService = new FoodProductsService(
         dataSource.getRepository(FoodProduct),

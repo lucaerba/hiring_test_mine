@@ -5,6 +5,7 @@ import { CreateIngredientDto } from "../ingredient/dto/create-ingredient.dto";
 import { Ingredient } from "../ingredient/ingredient.entity";
 import { IngredientsService } from "../ingredient/ingredients.service";
 import { getTestEmissionFactor, getTestIngredient } from "../seed-dev-data";
+import { UnitConverterService } from "../unitConverter/unitConverter.service";
 import { IngredientFootprint } from "./ingredientFootprint.entity";
 import { IngredientFootprintsService } from "./ingredientFootprints.service";
 
@@ -18,6 +19,7 @@ let oliveOilEmisionFactor = getTestEmissionFactor("oliveOil");
 let ingredientService: IngredientsService;
 let carbonEmissionFactorsService: CarbonEmissionFactorsService;
 let ingredientFootPrintsService: IngredientFootprintsService;
+let unitConverterService: UnitConverterService;
 
 beforeAll(async () => {
     await dataSource.initialize();
@@ -27,10 +29,12 @@ beforeAll(async () => {
     carbonEmissionFactorsService = new CarbonEmissionFactorsService(
         dataSource.getRepository(CarbonEmissionFactor)
     );
+    unitConverterService = new UnitConverterService();
     ingredientFootPrintsService = new IngredientFootprintsService(
         dataSource.getRepository(IngredientFootprint),
         ingredientService,
-        carbonEmissionFactorsService
+        carbonEmissionFactorsService,
+        unitConverterService
     );
 });
 

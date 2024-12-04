@@ -279,5 +279,5 @@ export const seedTestFoodProducts = async () => {
 if (require.main === module) {
   seedTestCarbonEmissionFactors().catch((e) => console.error(e));
   seedTestIngredients().catch((e) => console.error(e));
-  seedTestFoodProducts().catch((e) => console.error(e));
+  //seedTestFoodProducts().catch((e) => console.error(e));
 }

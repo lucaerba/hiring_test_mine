@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Get, Logger, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Logger, Post, UseGuards } from "@nestjs/common";
+import { AuthGuard } from '@nestjs/passport';
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
 import { CarbonEmissionFactorsService } from "./carbonEmissionFactors.service";
 import { CreateCarbonEmissionFactorDto } from "./dto/create-carbonEmissionFactor.dto";
@@ -9,6 +10,7 @@ export class CarbonEmissionFactorsController {
     private readonly carbonEmissionFactorService: CarbonEmissionFactorsService
   ) { }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   getCarbonEmissionFactors(): Promise<CarbonEmissionFactor[]> {
     Logger.log(
@@ -17,6 +19,7 @@ export class CarbonEmissionFactorsController {
     return this.carbonEmissionFactorService.findAll();
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   createCarbonEmissionFactors(
     @Body() carbonEmissionFactors: CreateCarbonEmissionFactorDto[]

@@ -6,6 +6,8 @@ import { CarbonEmissionFactorsService } from '../carbonEmissionFactor/carbonEmis
 import { Ingredient } from '../ingredient/ingredient.entity';
 import { IngredientsModule } from '../ingredient/ingredients.module';
 import { IngredientsService } from '../ingredient/ingredients.service';
+import { UnitConverterModule } from '../unitConverter/unitConverter.module';
+import { UnitConverterService } from '../unitConverter/unitConverter.service';
 import { IngredientFootprint } from './ingredientFootprint.entity';
 import { IngredientFootprintsService } from './ingredientFootprints.service';
 
@@ -18,11 +20,14 @@ import { IngredientFootprintsService } from './ingredientFootprints.service';
 
         IngredientsModule,
         CarbonEmissionFactorsModule,
+        UnitConverterModule
     ],
     providers: [
         IngredientFootprintsService,
         IngredientsService,
-        CarbonEmissionFactorsService],
+        CarbonEmissionFactorsService,
+        UnitConverterService
+    ],
     controllers: [],
     exports: [IngredientFootprintsService],
 })

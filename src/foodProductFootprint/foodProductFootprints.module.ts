@@ -11,6 +11,8 @@ import { IngredientsModule } from '../ingredient/ingredients.module';
 import { IngredientFootprint } from '../ingredientFootprint/ingredientFootprint.entity';
 import { IngredientFootprintsModule } from '../ingredientFootprint/ingredientFootprints.module';
 import { IngredientFootprintsService } from '../ingredientFootprint/ingredientFootprints.service';
+import { UnitConverterModule } from '../unitConverter/unitConverter.module';
+import { UnitConverterService } from '../unitConverter/unitConverter.service';
 import { FoodProductFootprint } from './foodProductFootprint.entity';
 import { FoodProductFootprintsController } from './foodProductFootprints.controller';
 import { FoodProductFootprintsService } from './foodProductFootprints.service';
@@ -28,8 +30,15 @@ import { FoodProductFootprintsService } from './foodProductFootprints.service';
         FoodProductsModule,
         IngredientsModule,
         CarbonEmissionFactorsModule,
+        UnitConverterModule
     ],
-    providers: [FoodProductFootprintsService, IngredientFootprintsService, FoodProductsService, CarbonEmissionFactorsService],
+    providers: [
+        FoodProductFootprintsService,
+        IngredientFootprintsService,
+        FoodProductsService,
+        CarbonEmissionFactorsService,
+        UnitConverterService
+    ],
     controllers: [FoodProductFootprintsController],
 })
 export class FoodProductFootprintsModule { }

@@ -3,6 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 import { dataSource, GreenlyDataSource } from "../config/dataSource";
 import { AppModule } from "../src/app.module";
+import { User } from "../src/auth/user/user.entity";
 import { CarbonEmissionFactor } from "../src/carbonEmissionFactor/carbonEmissionFactor.entity";
 import { FoodProduct } from "../src/foodProduct/foodProduct.entity";
 import { FoodProductFootprint } from "../src/foodProductFootprint/foodProductFootprint.entity";
@@ -17,6 +18,11 @@ afterAll(async () => {
     await dataSource.destroy();
 });
 
+let token: string;
+const loginUser = {
+    username: 'test',
+    password: 'test'
+};
 describe("FoodProductFootPrintController", () => {
     let app: INestApplication;
     let defaultFoodProductFootPrints: FoodProductFootprint[];
@@ -67,11 +73,21 @@ describe("FoodProductFootPrintController", () => {
         defaultFoodProductFootPrints = await dataSource
             .getRepository(FoodProductFootprint)
             .find();
+
+        await dataSource.getRepository(User).save(loginUser);
+        const response = await request(app.getHttpServer())
+            .post('/login')
+            .set('Accept', 'application/json')
+            .send(loginUser)
+            .expect(201);
+        token = response.body.token;
+
     });
 
     it("GET /food-product-foot-prints", async () => {
         return request(app.getHttpServer())
             .get("/food-product-foot-prints")
+            .set("Authorization", `Bearer ${token}`)
             .expect(200)
             .expect(({ body }) => {
                 expect(body).toEqual(defaultFoodProductFootPrints);
@@ -81,6 +97,7 @@ describe("FoodProductFootPrintController", () => {
     it("GET /food-product-foot-prints/:name", async () => {
         return request(app.getHttpServer())
             .get("/food-product-foot-prints/hamPizza")
+            .set("Authorization", `Bearer ${token}`)
             .expect(200)
             .expect(({ body }) => {
                 body = JSON.parse(JSON.stringify(body));
@@ -102,6 +119,7 @@ describe("FoodProductFootPrintController", () => {
             newFoodProduct.ingredients[1].quantity * getTestEmissionFactor("vinegar").emissionCO2eInKgPerUnit;
         const response = await request(app.getHttpServer())
             .post("/food-product-foot-prints")
+            .set("Authorization", `Bearer ${token}`)
             .send(newFoodProduct)
             .expect(201);
 
@@ -114,11 +132,13 @@ describe("FoodProductFootPrintController", () => {
         });
         expect(response.body.foodProduct.ingredients).toEqual(newFoodProduct.ingredients);
         expect(response.body.score).toBe(score);
+        return;
     });
 
     it("POST /food-product-foot-prints should return null if name is empty", async () => {
         return request(app.getHttpServer())
             .post("/food-product-foot-prints")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "",
                 ingredients: [
@@ -132,6 +152,7 @@ describe("FoodProductFootPrintController", () => {
     it("POST /food-product-foot-prints should return null if ingredients are invalid", async () => {
         return request(app.getHttpServer())
             .post("/food-product-foot-prints")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "blueCheeseSalad",
                 ingredients: [

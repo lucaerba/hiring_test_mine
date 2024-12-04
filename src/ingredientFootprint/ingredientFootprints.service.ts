@@ -6,6 +6,7 @@ import { CarbonEmissionFactorsService } from "../carbonEmissionFactor/carbonEmis
 import { CreateIngredientDto } from "../ingredient/dto/create-ingredient.dto";
 import { Ingredient } from "../ingredient/ingredient.entity";
 import { IngredientsService } from "../ingredient/ingredients.service";
+import { UnitConverterService } from "../unitConverter/unitConverter.service";
 import { CreateIngredientFootprintDto } from "./dto/create-ingredientFootprint.dto";
 import { IngredientFootprint } from "./ingredientFootprint.entity";
 
@@ -15,7 +16,8 @@ export class IngredientFootprintsService {
         @InjectRepository(IngredientFootprint)
         private ingredientFootPrintRepository: Repository<IngredientFootprint>,
         private ingredientService: IngredientsService,
-        private carbonEmissionFactorsService: CarbonEmissionFactorsService
+        private carbonEmissionFactorsService: CarbonEmissionFactorsService,
+        private unitConverterService: UnitConverterService,
     ) { }
 
     findAll(): Promise<IngredientFootprint[]> {
@@ -75,7 +77,13 @@ export class IngredientFootprintsService {
         carbon_emission_factor = await this.carbonEmissionFactorsService.findOneByName(ingredient.name);
 
         if (carbon_emission_factor) {
-            score = ingredient.quantity * carbon_emission_factor.emissionCO2eInKgPerUnit;
+
+            score = this.unitConverterService.convert(
+                ingredient.quantity,
+                ingredient.unit,
+                carbon_emission_factor.unit)
+                * carbon_emission_factor.emissionCO2eInKgPerUnit;
+
         } else {
             console.log(`Carbon Emission Factor for ${ingredient.name} not found`)
             throw new Error(`Carbon Emission Factor for ${ingredient.name} not found`);

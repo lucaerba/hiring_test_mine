@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Logger, Param, Post, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { CreateFoodProductDto } from '../foodProduct/dto/create-foodProduct.dto';
 import { FoodProductFootprint } from './foodProductFootprint.entity';
 import { FoodProductFootprintsService } from './foodProductFootprints.service';
@@ -9,6 +10,7 @@ export class FoodProductFootprintsController {
         private readonly foodProductFootsPrintService: FoodProductFootprintsService
     ) { }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get()
     getFoodProductFootPrints(): Promise<FoodProductFootprint[]> {
         Logger.log(
@@ -17,6 +19,7 @@ export class FoodProductFootprintsController {
         return this.foodProductFootsPrintService.findAll();
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get(':name')
     async getFoodProductFootprint(@Param('name') name: string): Promise<FoodProductFootprint | null> {
         Logger.log(
@@ -25,6 +28,7 @@ export class FoodProductFootprintsController {
         return this.foodProductFootsPrintService.findOneByFoodProductName(name);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post()
     async createFoodProductFootPrints(
         @Body() foodProductDto: CreateFoodProductDto
@@ -42,3 +46,5 @@ export class FoodProductFootprintsController {
         }
     }
 }
+
+

@@ -2,6 +2,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { typeorm } from "../config/dataSource";
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./auth/user/users.module";
 import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissionFactors.module";
 import { FoodProductsModule } from "./foodProduct/foodProducts.module";
 import { FoodProductFootprintsModule } from "./foodProductFootprint/foodProductFootprints.module";
@@ -24,6 +26,8 @@ import { IngredientFootprintsModule } from "./ingredientFootprint/ingredientFoot
     FoodProductsModule,
     FoodProductFootprintsModule,
     IngredientFootprintsModule,
+    AuthModule,
+    UsersModule
   ],
 })
 export class AppModule { }
