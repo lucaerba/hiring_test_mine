@@ -3,6 +3,10 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { typeorm } from "../config/dataSource";
 import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissionFactors.module";
+import { FoodProductsModule } from "./foodProduct/foodProducts.module";
+import { FoodProductFootprintsModule } from "./foodProductFootprint/foodProductFootprints.module";
+import { IngredientsModule } from "./ingredient/ingredients.module";
+import { IngredientFootprintsModule } from "./ingredientFootprint/ingredientFootprints.module";
 
 @Module({
   imports: [
@@ -16,6 +20,10 @@ import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissi
         configService.getOrThrow("typeorm"),
     }),
     CarbonEmissionFactorsModule,
+    IngredientsModule,
+    FoodProductsModule,
+    FoodProductFootprintsModule,
+    IngredientFootprintsModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

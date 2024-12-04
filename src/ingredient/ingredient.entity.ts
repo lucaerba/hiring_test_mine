@@ -1,6 +1,10 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, Index, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { FoodProduct } from "../foodProduct/foodProduct.entity";
+import { IngredientFootprint } from "../ingredientFootprint/ingredientFootprint.entity";
 
 @Entity("ingredients")
+//make name, unit, quantity unique
+@Index(["name", "unit", "quantity"], { unique: true })
 export class Ingredient extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -20,6 +24,21 @@ export class Ingredient extends BaseEntity {
     nullable: false,
   })
   quantity: number;
+
+  @OneToOne(() => IngredientFootprint, ingredientFootprint => ingredientFootprint.ingredient,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    }
+  )
+  ingredientFootPrint: IngredientFootprint;
+
+  @ManyToMany(type => FoodProduct, foodProduct => foodProduct.ingredients,
+    {
+      cascade: true,
+    }
+  )
+  foodProducts: FoodProduct[];
 
   sanitize() {
     if (this.name === "") {

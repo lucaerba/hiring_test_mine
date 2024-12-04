@@ -36,6 +36,7 @@ describe("CarbonEmissionFactorsController", () => {
   });
 
   it("GET /carbon-emission-factors", async () => {
+
     return request(app.getHttpServer())
       .get("/carbon-emission-factors")
       .expect(200)
@@ -59,5 +60,22 @@ describe("CarbonEmissionFactorsController", () => {
         expect(body.length).toEqual(1);
         expect(body[0]).toMatchObject(carbonEmissionFactorArgs);
       });
+  });
+
+  it("POST /carbon-emission-factors should return null if name/source is empty", async () => {
+    return request(app.getHttpServer())
+      .post("/carbon-emission-factors")
+      .send([{ name: "", unit: "kg", emissionCO2eInKgPerUnit: 12, source: "" }])
+      .expect(400);
+  });
+
+  it("POST /carbon-emission-factors should return null if name/source is empty", async () => {
+    return request(app.getHttpServer())
+      .post("/carbon-emission-factors")
+      .send([
+        { name: "Test Carbon Emission Factor", unit: "kg", emissionCO2eInKgPerUnit: 12, source: "source" },
+        { name: "", unit: "kg", emissionCO2eInKgPerUnit: 12, source: "" },
+      ])
+      .expect(400);
   });
 });

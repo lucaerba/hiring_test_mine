@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Logger, Post } from "@nestjs/common";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
 import { CarbonEmissionFactorsService } from "./carbonEmissionFactors.service";
 import { CreateCarbonEmissionFactorDto } from "./dto/create-carbonEmissionFactor.dto";
@@ -7,7 +7,7 @@ import { CreateCarbonEmissionFactorDto } from "./dto/create-carbonEmissionFactor
 export class CarbonEmissionFactorsController {
   constructor(
     private readonly carbonEmissionFactorService: CarbonEmissionFactorsService
-  ) {}
+  ) { }
 
   @Get()
   getCarbonEmissionFactors(): Promise<CarbonEmissionFactor[]> {
@@ -25,6 +25,12 @@ export class CarbonEmissionFactorsController {
     Logger.log(
       `[carbon-emission-factors] [POST] CarbonEmissionFactor: ${carbonEmissionFactors} created`
     );
-    return this.carbonEmissionFactorService.save(carbonEmissionFactors);
+    try {
+      return this.carbonEmissionFactorService.save(carbonEmissionFactors) || Promise.resolve(null);
+    } catch (e) {
+      Logger.error(`[carbon-emission-factors] [POST] Error: ${e.message}`);
+      throw new BadRequestException('Invalid data provided');
+    }
+
   }
 }

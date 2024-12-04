@@ -53,7 +53,7 @@ export class GreenlyDataSource {
         .map((entity) => `"${entity.tableName}"`)
         .join(", ");
 
-      await dataSource.query(`TRUNCATE ${tableNames} CASCADE;`);
+      await dataSource.query(`TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE;`);
     } catch (error) {
       throw new Error(`ERROR: Cleaning test database: ${error}`);
     }

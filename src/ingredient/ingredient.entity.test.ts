@@ -1,45 +1,47 @@
-import { Ingredient } from "./ingredient";
+import { GreenlyDataSource, dataSource } from "../../config/dataSource";
+import { Ingredient } from "./ingredient.entity";
 
-describe("Ingredient Entity", () => {
-  it("should create an ingredient with valid properties", () => {
-    const ingredient = new Ingredient({
-      name: "Sugar",
-      unit: "grams",
-      quantity: 100,
-    });
 
-    expect(ingredient.name).toBe("Sugar");
-    expect(ingredient.unit).toBe("grams");
-    expect(ingredient.quantity).toBe(100);
+let chickenIngredient: Ingredient;
+beforeAll(async () => {
+  await dataSource.initialize();
+  chickenIngredient = new Ingredient({
+    name: "chicken",
+    unit: "kg",
+    quantity: 1.2,
+  });
+});
+beforeEach(async () => {
+  await GreenlyDataSource.cleanDatabase();
+});
+afterAll(async () => {
+  await dataSource.destroy();
+});
+
+describe("constructor", () => {
+  it("should create a new Ingredient", () => {
+    expect(chickenIngredient.name).toBe("chicken");
+    expect(chickenIngredient.unit).toBe("kg");
+    expect(chickenIngredient.quantity).toBe(1.2);
   });
 
   it("should throw an error if name is empty", () => {
-    expect(() => {
-      new Ingredient({
-        name: "",
-        unit: "grams",
-        quantity: 100,
-      });
-    }).toThrowError("Name cannot be empty");
+    expect(() => new Ingredient({ name: "", unit: "kg", quantity: 1.2 })).toThrow(
+      "Name cannot be empty"
+    );
   });
 
   it("should throw an error if unit is empty", () => {
-    expect(() => {
-      new Ingredient({
-        name: "Sugar",
-        unit: "",
-        quantity: 100,
-      });
-    }).toThrowError("Unit cannot be empty");
+    expect(() => new Ingredient({ name: "chicken", unit: "", quantity: 1.2 })).toThrow(
+      "Unit cannot be empty"
+    );
   });
 
   it("should throw an error if quantity is negative", () => {
-    expect(() => {
-      new Ingredient({
-        name: "Sugar",
-        unit: "grams",
-        quantity: -100,
-      });
-    }).toThrowError("Quantity cannot be negative");
+    expect(() => new Ingredient({ name: "chicken", unit: "kg", quantity: -1.2 })).toThrow(
+      "Quantity cannot be negative"
+    );
   });
+
 });
+
