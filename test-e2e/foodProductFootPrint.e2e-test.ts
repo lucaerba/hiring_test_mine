@@ -9,7 +9,7 @@ import { FoodProduct } from "../src/foodProduct/foodProduct.entity";
 import { IngredientQuantity } from "../src/foodProduct/ingredientQuantity/ingredientQuantity.entity";
 import { FoodProductFootprint } from "../src/foodProductFootprint/foodProductFootprint.entity";
 import { Ingredient } from "../src/ingredient/ingredient.entity";
-import { getTestEmissionFactor, getTestFoodProduct, getTestFoodProductFootPrint, getTestIngredient, getTestIngredientQuantity } from "../src/seed-dev-data";
+import { getTestEmissionFactor, getTestFoodProduct, getTestFoodProductFootPrint, getTestIngredient, getTestIngredientQuantity, getTestInputFoodProduct } from "../src/seed-dev-data";
 
 beforeAll(async () => {
     await dataSource.initialize();
@@ -116,15 +116,10 @@ describe("FoodProductFootPrintController", () => {
     });
 
     it("POST /food-product-foot-prints", async () => {
-        const newFoodProduct = getTestFoodProduct("blueCheeseSalad");
-        const score =
-            newFoodProduct.ingredientQuantities.reduce(
-                (acc, ingredientQuantity) => {
-                    const emissionFactor = getTestEmissionFactor(ingredientQuantity.ingredient.name).emissionCO2eInKgPerUnit;
-                    return acc + emissionFactor * ingredientQuantity.quantity;
-                },
-                0
-            );
+        const newFoodProduct = getTestInputFoodProduct("hamCheesePizza");
+        const score = newFoodProduct.ingredients.reduce((acc, ingredient) => {
+            return acc + ingredient.quantity * getTestEmissionFactor(ingredient.name).emissionCO2eInKgPerUnit;
+        }, 0);
         const response = await request(app.getHttpServer())
             .post("/food-product-foot-prints")
             .set("Authorization", `Bearer ${token}`)
@@ -132,7 +127,7 @@ describe("FoodProductFootPrintController", () => {
             .expect(201);
 
         expect(response.body).not.toBeNull();
-        expect(response.body.foodProduct.name).toBe("blueCheeseSalad");
+        expect(response.body.foodProduct.name).toBe(newFoodProduct.name);
 
         response.body.foodProduct.ingredientQuantities = response.body.foodProduct.ingredientQuantities.map((iq: IngredientQuantity) => {
             return {
@@ -141,12 +136,12 @@ describe("FoodProductFootPrintController", () => {
                 unit: iq.unit,
             };
         });
-        expect(response.body.foodProduct.ingredientQuantities).toEqual(newFoodProduct.ingredientQuantities);
-        expect(response.body.foodProduct.ingredientQuantities.length).toBe(newFoodProduct.ingredientQuantities.length);
-        expect(response.body.foodProduct.ingredientQuantities[0].ingredient.name).toBe(newFoodProduct.ingredientQuantities[0].ingredient.name);
-        expect(response.body.foodProduct.ingredientQuantities[0].quantity).toBe(newFoodProduct.ingredientQuantities[0].quantity);
-        expect(response.body.foodProduct.ingredientQuantities[0].unit).toBe(newFoodProduct.ingredientQuantities[0].unit);
-        expect(response.body.foodProduct.ingredientQuantities[1].ingredient.name).toBe(newFoodProduct.ingredientQuantities[1].ingredient.name);
+
+        expect(response.body.foodProduct.ingredientQuantities.length).toBe(newFoodProduct.ingredients.length);
+        expect(response.body.foodProduct.ingredientQuantities[0].ingredient.name).toBe(newFoodProduct.ingredients[0].name);
+        expect(response.body.foodProduct.ingredientQuantities[0].quantity).toBe(newFoodProduct.ingredients[0].quantity);
+        expect(response.body.foodProduct.ingredientQuantities[0].unit).toBe(newFoodProduct.ingredients[0].unit);
+        expect(response.body.foodProduct.ingredientQuantities[1].ingredient.name).toBe(newFoodProduct.ingredients[1].name);
         expect(response.body.score).toBe(score);
         return;
     });

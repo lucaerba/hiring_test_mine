@@ -1,13 +1,14 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class FoodProductFootprint1733657725781 implements MigrationInterface {
-    name = 'FoodProductFootprint1733657725781'
+export class FoodProductFootprint1733765281966 implements MigrationInterface {
+    name = 'FoodProductFootprint1733765281966'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "ingredient_quantity_foot_prints" ("id" SERIAL NOT NULL, "score" double precision NOT NULL, "ingredientQuantityId" integer, CONSTRAINT "REL_6d7194a6c79dd57fbc549c8c82" UNIQUE ("ingredientQuantityId"), CONSTRAINT "PK_0646d2d810beca6a9cb4c9146bf" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "food_products" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, CONSTRAINT "PK_3aca8796e89325904061ed18b12" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_2f4d514f7e5374ce4b3091c036" ON "food_products" ("name") `);
         await queryRunner.query(`CREATE TABLE "ingredient_quantities" ("id" SERIAL NOT NULL, "quantity" double precision NOT NULL, "unit" character varying NOT NULL, "ingredientId" integer, CONSTRAINT "PK_097d772fb7ad7af49be9f91cca9" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_28a0f91b0c4b3d245255e32e20" ON "ingredient_quantities" ("ingredientId", "quantity", "unit") `);
         await queryRunner.query(`CREATE TABLE "ingredients" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, CONSTRAINT "PK_9240185c8a5507251c9f15e0649" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_a955029b22ff66ae9fef2e161f" ON "ingredients" ("name") `);
         await queryRunner.query(`CREATE TABLE "food_product_foot_prints" ("id" SERIAL NOT NULL, "score" double precision NOT NULL, "foodProductId" integer, CONSTRAINT "REL_a9cac28610719c5a297be8a5ad" UNIQUE ("foodProductId"), CONSTRAINT "PK_802e762d3b0cfa1aa9c95a322d5" PRIMARY KEY ("id"))`);
@@ -35,6 +36,7 @@ export class FoodProductFootprint1733657725781 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "food_product_foot_prints"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_a955029b22ff66ae9fef2e161f"`);
         await queryRunner.query(`DROP TABLE "ingredients"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_28a0f91b0c4b3d245255e32e20"`);
         await queryRunner.query(`DROP TABLE "ingredient_quantities"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_2f4d514f7e5374ce4b3091c036"`);
         await queryRunner.query(`DROP TABLE "food_products"`);

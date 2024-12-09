@@ -45,7 +45,7 @@ export class AuthService {
         const user = await this.usersService.findOneByName(loginUserDto.username);
         //console.log('user :', user);
         if (!user) {
-            throw new UnauthorizedException('User does not exist');
+            throw new UnauthorizedException('User does not exist ', loginUserDto.username);
         }
 
         const isPasswordValid = loginUserDto.password === user.password; // Assuming passwords are already hashed

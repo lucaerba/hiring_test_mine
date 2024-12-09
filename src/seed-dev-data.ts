@@ -332,6 +332,70 @@ export const getTestFoodProduct = (name: string) => {
   return foodProduct;
 }
 
+export const INPUT_FOOD_PRODUCT = [
+  {
+    name: "hamCheesePizza",
+    ingredients: [
+      { name: "ham", quantity: 0.1, unit: "kg" },
+      { name: "cheese", quantity: 0.15, unit: "kg" },
+      { name: "tomato", quantity: 0.4, unit: "kg" },
+      { name: "flour", quantity: 0.7, unit: "kg" },
+    ]
+  },
+  {
+    name: "blueCheeseSalad",
+    ingredients: [
+      { name: "blueCheese", quantity: 0.5, unit: "kg" },
+      { name: "vinegar", quantity: 0.6, unit: "kg" },
+    ]
+  },
+  {
+    name: "beefBurger",
+    ingredients: [
+      { name: "beef", quantity: 0.7, unit: "kg" },
+      { name: "oliveOil", quantity: 0.8, unit: "kg" },
+    ]
+  },
+  {
+    name: "chickenPizza",
+    ingredients: [
+      { name: "chicken", quantity: 0.9, unit: "kg" },
+      { name: "oliveOil", quantity: 0.8, unit: "kg" },
+      { name: "flour", quantity: 0.4, unit: "kg" },
+    ]
+  },
+  {
+    name: "porkBurger",
+    ingredients: [
+      { name: "pork", quantity: 1.0, unit: "kg" },
+      { name: "oliveOil", quantity: 0.8, unit: "kg" },
+    ]
+  }
+].map((args) => {
+  return {
+    name: args.name,
+    ingredients: args.ingredients.map((ingredient) => {
+      return {
+        name: ingredient.name,
+        quantity: ingredient.quantity,
+        unit: ingredient.unit,
+      };
+    }),
+  };
+});
+
+export const getTestInputFoodProduct = (name: string) => {
+  const foodProduct = INPUT_FOOD_PRODUCT.find(
+    (fp) => fp.name === name
+  );
+  if (!foodProduct) {
+    throw new Error(
+      `test input food product with name ${name} could not be found`
+    );
+  }
+  return foodProduct;
+}
+
 export const TEST_FOOD_PRODUCTS_FOOTPRINTS = [
   {
     foodProduct: getTestFoodProduct("hamPizza"),

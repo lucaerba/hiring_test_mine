@@ -1,7 +1,7 @@
-import { Ingredient } from "../../../ingredient/ingredient.entity";
+import { CreateIngredientDto } from "../../../ingredient/dto/create-ingredient.dto";
 
 export class CreateIngredientQuantityDto {
-    ingredient: Ingredient;
+    ingredient: CreateIngredientDto;
     quantity: number;
     unit: string;
 }

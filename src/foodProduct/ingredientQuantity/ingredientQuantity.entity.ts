@@ -1,9 +1,10 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { IngredientQuantityFootprint } from "../../foodProductFootprint/ingredientQuantityFootprint/ingredientQuantityFootprint.entity";
 import { Ingredient } from "../../ingredient/ingredient.entity";
 import { FoodProduct } from "../foodProduct.entity";
 
 @Entity("ingredient_quantities")
+@Index(["ingredient", "quantity", "unit"], { unique: true })
 export class IngredientQuantity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;

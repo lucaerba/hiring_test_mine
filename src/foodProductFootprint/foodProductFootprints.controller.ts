@@ -1,8 +1,9 @@
 import { BadRequestException, Body, Controller, Get, Logger, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateFoodProductDto } from '../foodProduct/dto/create-foodProduct.dto';
+import { FoodProductInputDto } from './dto/input-foodProduct.dto';
 import { FoodProductFootprint } from './foodProductFootprint.entity';
 import { FoodProductFootprintsService } from './foodProductFootprints.service';
+import { transformToCreateFoodProductDto } from './transformers/foodProduct.transformer';
 
 @Controller('food-product-foot-prints')
 export class FoodProductFootprintsController {
@@ -31,18 +32,20 @@ export class FoodProductFootprintsController {
     @UseGuards(AuthGuard('jwt'))
     @Post()
     async createFoodProductFootPrints(
-        @Body() foodProductDto: CreateFoodProductDto
+        @Body() foodProductInputDto: FoodProductInputDto
     ): Promise<FoodProductFootprint | null> {
         try {
-            console.log(`[food-product-foot-prints] [POST] FoodProductFootPrint: ${foodProductDto.name} created`);
-            Logger.log(
-                `[food-product-foot-prints] [POST] FoodProductFootPrint: ${foodProductDto} created`
-            );
+            console.log(foodProductInputDto);
+            const foodProductDto = transformToCreateFoodProductDto(foodProductInputDto);
+            console.log(foodProductDto);
             const result = await this.foodProductFootsPrintService.computeSaveFootPrint(foodProductDto);
+            Logger.log(
+                `[food-product-foot-prints] [POST] FoodProductFootPrint: ${foodProductDto.name} created`
+            );
             return result;
         } catch (e) {
             console.log(e);
-            throw new BadRequestException(`Error creating FoodProductFootPrint: ${foodProductDto.name}`);
+            throw new BadRequestException(`Error creating FoodProductFootPrint: ${foodProductInputDto.name}`);
         }
     }
 }

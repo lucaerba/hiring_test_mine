@@ -52,9 +52,12 @@ export class FoodProductFootprintsService {
 
             const score = await this.computeFootPrint(foodProduct);
 
-            const foodProductFootPrint = new CreateFoodProductFootprintDto();
-            foodProductFootPrint.foodProduct = foodProductNew!;
-            foodProductFootPrint.score = score;
+            const foodProductFootPrint = new FoodProductFootprint(
+                {
+                    foodProduct: foodProductNew!,
+                    score: score,
+                }
+            );
 
             return this.save(foodProductFootPrint);
         } catch (error) {

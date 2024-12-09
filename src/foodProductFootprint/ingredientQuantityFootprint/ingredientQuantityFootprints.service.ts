@@ -38,15 +38,15 @@ export class IngredientQuantityFootprintsService {
                 ingredientQuantity.quantity,
                 ingredientQuantity.unit
             );
-            let newIngredientQuantity: IngredientQuantity;
+            let newIngredientQuantity: IngredientQuantity | null;
             if (!ingredientQuantityExist) {
-                newIngredientQuantity = new IngredientQuantity(ingredientQuantity);
+                newIngredientQuantity = await this.ingredientQuantitiesService.save(ingredientQuantity);
             } else {
                 newIngredientQuantity = ingredientQuantityExist;
             }
-            const score = await this.calulateFootPrint(newIngredientQuantity);
+            const score = await this.calulateFootPrint(newIngredientQuantity!);
             const ingredientQuantityFootprint = new IngredientQuantityFootprint({
-                ingredientQuantity: newIngredientQuantity,
+                ingredientQuantity: newIngredientQuantity!,
                 score: score,
             });
             return this.save(ingredientQuantityFootprint);
