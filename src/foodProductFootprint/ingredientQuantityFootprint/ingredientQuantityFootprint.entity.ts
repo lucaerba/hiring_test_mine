@@ -1,18 +1,18 @@
 import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Ingredient } from "../ingredient/ingredient.entity";
+import { IngredientQuantity } from "../../foodProduct/ingredientQuantity/ingredientQuantity.entity";
 
-@Entity("ingredient_foot_prints")
-export class IngredientFootprint extends BaseEntity {
+@Entity("ingredient_quantity_foot_prints")
+export class IngredientQuantityFootprint extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @OneToOne(() => Ingredient, ingredient => ingredient.ingredientFootPrint,
+    @OneToOne(() => IngredientQuantity, ingredientQuantity => ingredientQuantity.ingredientQuantityFootprint,
         {
             cascade: ["insert"],
         }
     )
     @JoinColumn()
-    ingredient: Ingredient;
+    ingredientQuantity: IngredientQuantity;
 
     @Column({
         type: "float",
@@ -28,12 +28,12 @@ export class IngredientFootprint extends BaseEntity {
     }
 
     constructor(props: {
-        ingredient: Ingredient;
+        ingredientQuantity: IngredientQuantity;
         score: number;
     }) {
         super();
 
-        this.ingredient = props?.ingredient;
+        this.ingredientQuantity = props?.ingredientQuantity;
         this.score = props?.score;
         this.sanitize();
     }

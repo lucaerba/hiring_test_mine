@@ -6,9 +6,10 @@ import { AppModule } from "../src/app.module";
 import { User } from "../src/auth/user/user.entity";
 import { CarbonEmissionFactor } from "../src/carbonEmissionFactor/carbonEmissionFactor.entity";
 import { FoodProduct } from "../src/foodProduct/foodProduct.entity";
+import { IngredientQuantity } from "../src/foodProduct/ingredientQuantity/ingredientQuantity.entity";
 import { FoodProductFootprint } from "../src/foodProductFootprint/foodProductFootprint.entity";
 import { Ingredient } from "../src/ingredient/ingredient.entity";
-import { getTestEmissionFactor, getTestFoodProduct, getTestFoodProductFootPrint, getTestIngredient } from "../src/seed-dev-data";
+import { getTestEmissionFactor, getTestFoodProduct, getTestFoodProductFootPrint, getTestIngredient, getTestIngredientQuantity } from "../src/seed-dev-data";
 
 beforeAll(async () => {
     await dataSource.initialize();
@@ -63,6 +64,14 @@ describe("FoodProductFootPrintController", () => {
             .save(getTestIngredient("tomato"));
 
         await dataSource
+            .getRepository(IngredientQuantity)
+            .save([
+                getTestIngredientQuantity("ham", 0.1, "kg"),
+                getTestIngredientQuantity("cheese", 0.2, "kg"),
+                getTestIngredientQuantity("tomato", 0.3, "kg"),
+                getTestIngredientQuantity("flour", 0.4, "kg"),
+            ]);
+        await dataSource
             .getRepository(FoodProduct)
             .save([getTestFoodProduct("hamPizza")]);
 
@@ -101,22 +110,21 @@ describe("FoodProductFootPrintController", () => {
             .expect(200)
             .expect(({ body }) => {
                 body = JSON.parse(JSON.stringify(body));
-                expect(body.foodProduct.ingredients).toEqual(getTestFoodProductFootPrint("hamPizza").foodProduct.ingredients)
+                expect(body.foodProduct.ingredientQuantities).toEqual(getTestFoodProductFootPrint("hamPizza").foodProduct.ingredientQuantities)
                 expect(body.score).toEqual(getTestFoodProductFootPrint("hamPizza").score);
             });
     });
 
     it("POST /food-product-foot-prints", async () => {
-        const newFoodProduct = {
-            name: "blueCheeseSalad",
-            ingredients: [
-                { name: "blueCheese", unit: "kg", quantity: 0.5 },
-                { name: "vinegar", unit: "kg", quantity: 0.6 },
-            ],
-        };
+        const newFoodProduct = getTestFoodProduct("blueCheeseSalad");
         const score =
-            newFoodProduct.ingredients[0].quantity * getTestEmissionFactor("blueCheese").emissionCO2eInKgPerUnit +
-            newFoodProduct.ingredients[1].quantity * getTestEmissionFactor("vinegar").emissionCO2eInKgPerUnit;
+            newFoodProduct.ingredientQuantities.reduce(
+                (acc, ingredientQuantity) => {
+                    const emissionFactor = getTestEmissionFactor(ingredientQuantity.ingredient.name).emissionCO2eInKgPerUnit;
+                    return acc + emissionFactor * ingredientQuantity.quantity;
+                },
+                0
+            );
         const response = await request(app.getHttpServer())
             .post("/food-product-foot-prints")
             .set("Authorization", `Bearer ${token}`)
@@ -126,11 +134,19 @@ describe("FoodProductFootPrintController", () => {
         expect(response.body).not.toBeNull();
         expect(response.body.foodProduct.name).toBe("blueCheeseSalad");
 
-        response.body.foodProduct.ingredients = response.body.foodProduct.ingredients.map((ingredient: Ingredient) => {
-            const { id, ...ingredientWithoutId } = ingredient;
-            return ingredientWithoutId;
+        response.body.foodProduct.ingredientQuantities = response.body.foodProduct.ingredientQuantities.map((iq: IngredientQuantity) => {
+            return {
+                ingredient: { name: iq.ingredient.name },
+                quantity: iq.quantity,
+                unit: iq.unit,
+            };
         });
-        expect(response.body.foodProduct.ingredients).toEqual(newFoodProduct.ingredients);
+        expect(response.body.foodProduct.ingredientQuantities).toEqual(newFoodProduct.ingredientQuantities);
+        expect(response.body.foodProduct.ingredientQuantities.length).toBe(newFoodProduct.ingredientQuantities.length);
+        expect(response.body.foodProduct.ingredientQuantities[0].ingredient.name).toBe(newFoodProduct.ingredientQuantities[0].ingredient.name);
+        expect(response.body.foodProduct.ingredientQuantities[0].quantity).toBe(newFoodProduct.ingredientQuantities[0].quantity);
+        expect(response.body.foodProduct.ingredientQuantities[0].unit).toBe(newFoodProduct.ingredientQuantities[0].unit);
+        expect(response.body.foodProduct.ingredientQuantities[1].ingredient.name).toBe(newFoodProduct.ingredientQuantities[1].ingredient.name);
         expect(response.body.score).toBe(score);
         return;
     });

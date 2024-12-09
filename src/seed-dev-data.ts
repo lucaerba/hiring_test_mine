@@ -1,6 +1,7 @@
 import { dataSource } from "../config/dataSource";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor/carbonEmissionFactor.entity";
 import { FoodProduct } from "./foodProduct/foodProduct.entity";
+import { IngredientQuantity } from "./foodProduct/ingredientQuantity/ingredientQuantity.entity";
 import { FoodProductFootprint } from "./foodProductFootprint/foodProductFootprint.entity";
 import { Ingredient } from "./ingredient/ingredient.entity";
 
@@ -74,65 +75,6 @@ export const TEST_CARBON_EMISSION_FACTORS = [
   });
 });
 
-export const TEST_INGREDIENTS = [
-  {
-    name: "ham",
-    unit: "kg",
-    quantity: 0.1,
-  },
-  {
-    name: "cheese",
-    unit: "kg",
-    quantity: 0.2,
-  },
-  {
-    name: "tomato",
-    unit: "kg",
-    quantity: 0.3,
-  },
-  {
-    name: "flour",
-    unit: "kg",
-    quantity: 0.4,
-  },
-  {
-    name: "blueCheese",
-    unit: "kg",
-    quantity: 0.5,
-  },
-  {
-    name: "vinegar",
-    unit: "kg",
-    quantity: 0.6,
-  },
-  {
-    name: "beef",
-    unit: "kg",
-    quantity: 0.7,
-  },
-  {
-    name: "oliveOil",
-    unit: "kg",
-    quantity: 0.8,
-  },
-  {
-    name: "chicken",
-    unit: "kg",
-    quantity: 0.9,
-  },
-  {
-    name: "pork",
-    unit: "kg",
-    quantity: 1.0,
-  }
-].map((args) => {
-  return new Ingredient({
-    name: args.name,
-    unit: args.unit,
-    quantity: args.quantity,
-  });
-});
-
 export const getTestEmissionFactor = (name: string) => {
   const emissionFactor = TEST_CARBON_EMISSION_FACTORS.find(
     (ef) => ef.name === name
@@ -144,6 +86,44 @@ export const getTestEmissionFactor = (name: string) => {
   }
   return emissionFactor;
 };
+
+
+export const TEST_INGREDIENTS = [
+  {
+    name: "ham",
+  },
+  {
+    name: "cheese",
+  },
+  {
+    name: "tomato",
+  },
+  {
+    name: "flour",
+  },
+  {
+    name: "blueCheese",
+  },
+  {
+    name: "vinegar",
+  },
+  {
+    name: "beef",
+  },
+  {
+    name: "oliveOil",
+  },
+  {
+    name: "chicken",
+  },
+  {
+    name: "pork",
+  }
+].map((args) => {
+  return new Ingredient({
+    name: args.name,
+  });
+});
 
 export const getTestIngredient = (name: string) => {
   const ingredient = TEST_INGREDIENTS.find(
@@ -157,50 +137,186 @@ export const getTestIngredient = (name: string) => {
   return ingredient;
 };
 
+export const TEST_INGREDIENT_QUANTITIES = [
+  {
+    ingredient: getTestIngredient("ham"),
+    quantity: 0.1,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("ham"),
+    quantity: 0.2,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("cheese"),
+    quantity: 0.2,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("tomato"),
+    quantity: 0.3,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("flour"),
+    quantity: 0.4,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("flour"),
+    quantity: 0.5,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("flour"),
+    quantity: 1.2,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("flour"),
+    quantity: 1,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("blueCheese"),
+    quantity: 0.5,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("vinegar"),
+    quantity: 0.6,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("vinegar"),
+    quantity: 0.5,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("beef"),
+    quantity: 0.7,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("beef"),
+    quantity: 0.5,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("beef"),
+    quantity: 1.2,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("oliveOil"),
+    quantity: 0.8,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("oliveOil"),
+    quantity: 1.2,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("oliveOil"),
+    quantity: 0.3,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("oliveOil"),
+    quantity: 1,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("chicken"),
+    quantity: 0.9,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("chicken"),
+    quantity: 1,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("chicken"),
+    quantity: 1.2,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("chicken"),
+    quantity: 0.5,
+    unit: "kg",
+  },
+  {
+    ingredient: getTestIngredient("pork"),
+    quantity: 1.0,
+    unit: "kg",
+  }
+].map((args) => {
+  return new IngredientQuantity({
+    ingredient: args.ingredient,
+    quantity: args.quantity,
+    unit: args.unit,
+  });
+});
+
+export const getTestIngredientQuantity = (name: string, quantity: number, unit: string) => {
+  const ingredientQuantity = TEST_INGREDIENT_QUANTITIES.find(
+    (iq) => iq.ingredient.name === name && iq.quantity === quantity && iq.unit === unit
+  );
+  if (!ingredientQuantity) {
+    throw new Error(
+      `test ingredient quantity with name ${name}, quantity ${quantity}, and unit ${unit} could not be found`
+    );
+  }
+  return ingredientQuantity;
+};
+
+
 export const TEST_FOOD_PRODUCTS = [
   {
     name: "hamPizza",
-    ingredients: [
-      getTestIngredient("ham"),
-      getTestIngredient("cheese"),
-      getTestIngredient("tomato"),
-      getTestIngredient("flour"),
+    ingredientQuantities: [
+      getTestIngredientQuantity("ham", 0.1, "kg"),
+      getTestIngredientQuantity("cheese", 0.2, "kg"),
+      getTestIngredientQuantity("tomato", 0.3, "kg"),
+      getTestIngredientQuantity("flour", 0.4, "kg"),
     ],
   },
   {
     name: "blueCheeseSalad",
-    ingredients: [
-      getTestIngredient("blueCheese"),
-      getTestIngredient("vinegar"),
+    ingredientQuantities: [
+      getTestIngredientQuantity("blueCheese", 0.5, "kg"),
+      getTestIngredientQuantity("vinegar", 0.6, "kg"),
     ],
   },
   {
     name: "beefBurger",
-    ingredients: [
-      getTestIngredient("beef"),
-      getTestIngredient("oliveOil"),
+    ingredientQuantities: [
+      getTestIngredientQuantity("beef", 0.7, "kg"),
+      getTestIngredientQuantity("oliveOil", 0.8, "kg"),
     ],
   },
   {
     name: "chickenPizza",
-    ingredients: [
-      getTestIngredient("chicken"),
-      getTestIngredient("cheese"),
-      getTestIngredient("tomato"),
-      getTestIngredient("flour"),
+    ingredientQuantities: [
+      getTestIngredientQuantity("chicken", 0.9, "kg"),
+      getTestIngredientQuantity("oliveOil", 0.8, "kg"),
+      getTestIngredientQuantity("flour", 0.4, "kg"),
     ],
   },
   {
     name: "porkBurger",
-    ingredients: [
-      getTestIngredient("pork"),
-      getTestIngredient("oliveOil"),
+    ingredientQuantities: [
+      getTestIngredientQuantity("pork", 1.0, "kg"),
+      getTestIngredientQuantity("oliveOil", 0.8, "kg"),
     ],
   }
 ].map((args) => {
   return new FoodProduct({
     name: args.name,
-    ingredients: args.ingredients,
+    ingredientQuantities: args.ingredientQuantities,
   });
 });
 
@@ -267,17 +383,31 @@ export const seedTestIngredients = async () => {
   await ingredientService.save(TEST_INGREDIENTS);
 };
 
+export const seedTestIngredientQuantities = async () => {
+  if (!dataSource.isInitialized) {
+    await dataSource.initialize();
+  }
+  const ingredientService = dataSource.getRepository(Ingredient);
+  const ingredientQuantityService = dataSource.getRepository(IngredientQuantity)
+
+  await ingredientQuantityService.save(TEST_INGREDIENT_QUANTITIES);
+};
+
 export const seedTestFoodProducts = async () => {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();
   }
   const foodProductService = dataSource.getRepository(FoodProduct);
+  const ingredientService = dataSource.getRepository(Ingredient);
+  const ingredientQuantityService = dataSource.getRepository(IngredientQuantity);
 
+  await ingredientQuantityService.save(TEST_INGREDIENT_QUANTITIES);
   await foodProductService.save(TEST_FOOD_PRODUCTS);
 };
 
 if (require.main === module) {
   seedTestCarbonEmissionFactors().catch((e) => console.error(e));
   seedTestIngredients().catch((e) => console.error(e));
-  //seedTestFoodProducts().catch((e) => console.error(e));
+  seedTestIngredientQuantities().catch((e) => console.error(e));
+  seedTestFoodProducts().catch((e) => console.error(e));
 }

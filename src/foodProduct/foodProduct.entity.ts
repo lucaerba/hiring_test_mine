@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, Index, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Ingredient } from "../ingredient/ingredient.entity";
+import { IngredientQuantity } from "./ingredientQuantity/ingredientQuantity.entity";
 
 @Entity("food_products")
 @Index(["name"], { unique: true })
@@ -12,35 +12,34 @@ export class FoodProduct extends BaseEntity {
     })
     name: string;
 
-    @ManyToMany(type => Ingredient, {
-        cascade: ["update"],
+    @ManyToMany(type => IngredientQuantity, {
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
         nullable: false,
     })
     @JoinTable()
-    ingredients: Ingredient[];
+    ingredientQuantities: IngredientQuantity[];
 
     sanitize() {
         if (this.name === "") {
             throw new Error("Name cannot be empty");
         }
-        // if (!this.ingredients || this.ingredients.length === 0) {
-        //     throw new Error("Ingredients cannot be empty");
-        // }
-        if (this.ingredients)
-            this.ingredients.forEach(ingredient => {
-                ingredient.sanitize();
+
+        if (this.ingredientQuantities)
+            this.ingredientQuantities.forEach(IngredientQuantity => {
+                IngredientQuantity.sanitize();
             });
 
     }
 
     constructor(props: {
         name: string;
-        ingredients: Ingredient[];
+        ingredientQuantities: IngredientQuantity[];
     }) {
         super();
 
         this.name = props?.name;
-        this.ingredients = props?.ingredients;
-        this.sanitize(); // Removed validation from constructor
+        this.ingredientQuantities = props?.ingredientQuantities;
+        this.sanitize();
     }
 }

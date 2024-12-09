@@ -15,14 +15,12 @@ export class IngredientsService {
     return this.ingredientRepository.find();
   }
 
-  findOneByNameQuantity(
+  findOneByName(
     name: string,
-    quantity: number
   ): Promise<Ingredient | null> {
     return this.ingredientRepository.findOne({
       where: {
         name: name,
-        quantity: quantity,
       },
     });
   }
@@ -31,19 +29,18 @@ export class IngredientsService {
     ingredient: CreateIngredientDto
   ): Promise<Ingredient | null> {
     try {
-      const ingredientExist = await this.findOneByNameQuantity(ingredient.name, ingredient.quantity);
+      const ingredientExist = await this.findOneByName(ingredient.name);
+
       if (ingredientExist !== null) {
         return ingredientExist;
       }
       const ingredientNew = new Ingredient({
         name: ingredient.name,
-        unit: ingredient.unit,
-        quantity: ingredient.quantity,
       });
       return await this.ingredientRepository.save(ingredientNew);
     } catch (error) {
       console.log(error);
-      return null;
+      throw new Error(`Error saving ingredient ${ingredient.name}`);
     }
   }
 }

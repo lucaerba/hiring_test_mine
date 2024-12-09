@@ -6,16 +6,19 @@ import { CarbonEmissionFactorsService } from '../carbonEmissionFactor/carbonEmis
 import { FoodProduct } from '../foodProduct/foodProduct.entity';
 import { FoodProductsModule } from '../foodProduct/foodProducts.module';
 import { FoodProductsService } from '../foodProduct/foodProducts.service';
+import { IngredientQuantitiesModule } from '../foodProduct/ingredientQuantity/ingredientQuantities.module';
+import { IngredientQuantitiesService } from '../foodProduct/ingredientQuantity/ingredientQuantities.service';
+import { IngredientQuantity } from '../foodProduct/ingredientQuantity/ingredientQuantity.entity';
 import { Ingredient } from '../ingredient/ingredient.entity';
 import { IngredientsModule } from '../ingredient/ingredients.module';
-import { IngredientFootprint } from '../ingredientFootprint/ingredientFootprint.entity';
-import { IngredientFootprintsModule } from '../ingredientFootprint/ingredientFootprints.module';
-import { IngredientFootprintsService } from '../ingredientFootprint/ingredientFootprints.service';
-import { UnitConverterModule } from '../unitConverter/unitConverter.module';
-import { UnitConverterService } from '../unitConverter/unitConverter.service';
 import { FoodProductFootprint } from './foodProductFootprint.entity';
 import { FoodProductFootprintsController } from './foodProductFootprints.controller';
 import { FoodProductFootprintsService } from './foodProductFootprints.service';
+import { IngredientQuantityFootprint } from './ingredientQuantityFootprint/ingredientQuantityFootprint.entity';
+import { IngredientQuantityFootprintsModule } from './ingredientQuantityFootprint/ingredientQuantityFootprints.module';
+import { IngredientQuantityFootprintsService } from './ingredientQuantityFootprint/ingredientQuantityFootprints.service';
+import { UnitConverterModule } from './ingredientQuantityFootprint/unitConverter/unitConverter.module';
+import { UnitConverterService } from './ingredientQuantityFootprint/unitConverter/unitConverter.service';
 
 @Module({
     imports: [
@@ -23,18 +26,21 @@ import { FoodProductFootprintsService } from './foodProductFootprints.service';
             FoodProductFootprint,
             FoodProduct,
             Ingredient,
-            IngredientFootprint,
+            IngredientQuantity,
+            IngredientQuantityFootprint,
             CarbonEmissionFactor
         ]),
-        IngredientFootprintsModule,
+        IngredientQuantityFootprintsModule,
         FoodProductsModule,
         IngredientsModule,
         CarbonEmissionFactorsModule,
-        UnitConverterModule
+        UnitConverterModule,
+        IngredientQuantitiesModule
     ],
     providers: [
         FoodProductFootprintsService,
-        IngredientFootprintsService,
+        IngredientQuantityFootprintsService,
+        IngredientQuantitiesService,
         FoodProductsService,
         CarbonEmissionFactorsService,
         UnitConverterService

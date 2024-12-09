@@ -1,34 +1,24 @@
 import { GreenlyDataSource, dataSource } from "../../config/dataSource";
 import { FoodProduct } from "../foodProduct/foodProduct.entity";
-import { Ingredient } from "../ingredient/ingredient.entity";
+import { IngredientQuantity } from "../foodProduct/ingredientQuantity/ingredientQuantity.entity";
+import { getTestIngredientQuantity } from "../seed-dev-data";
 import { FoodProductFootprint } from "./foodProductFootprint.entity";
 
 let chickenPizzaFoodProduct: FoodProduct;
-let chickenIngredient: Ingredient;
-let flourIngredient: Ingredient;
-let oliveOilIngredient: Ingredient;
+let savedChickenIngredientQuantity: IngredientQuantity;
+let savedFlourIngredientQuantity: IngredientQuantity;
+let savedOliveOilIngredientQuantity: IngredientQuantity;
 let chickenPizzaFoodProductFootPrint: FoodProductFootprint;
 
 beforeAll(async () => {
     await dataSource.initialize();
-    chickenIngredient = new Ingredient({
-        name: "chicken",
-        unit: "kg",
-        quantity: 1.2,
-    });
-    flourIngredient = new Ingredient({
-        name: "flour",
-        unit: "kg",
-        quantity: 1.2,
-    });
-    oliveOilIngredient = new Ingredient({
-        name: "oliveOil",
-        unit: "kg",
-        quantity: 1.2,
-    });
+    savedChickenIngredientQuantity = await getTestIngredientQuantity("chicken", 1, "kg");
+    savedFlourIngredientQuantity = await getTestIngredientQuantity("flour", 1, "kg");
+    savedOliveOilIngredientQuantity = await getTestIngredientQuantity("oliveOil", 1, "kg");
+
     chickenPizzaFoodProduct = new FoodProduct({
         name: "chickenPizza",
-        ingredients: [chickenIngredient, flourIngredient, oliveOilIngredient],
+        ingredientQuantities: [savedChickenIngredientQuantity, savedFlourIngredientQuantity, savedOliveOilIngredientQuantity],
     });
     chickenPizzaFoodProductFootPrint = new FoodProductFootprint({
         foodProduct: chickenPizzaFoodProduct,

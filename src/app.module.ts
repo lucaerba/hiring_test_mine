@@ -7,8 +7,8 @@ import { UsersModule } from "./auth/user/users.module";
 import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissionFactors.module";
 import { FoodProductsModule } from "./foodProduct/foodProducts.module";
 import { FoodProductFootprintsModule } from "./foodProductFootprint/foodProductFootprints.module";
+import { IngredientQuantityFootprintsModule } from "./foodProductFootprint/ingredientQuantityFootprint/ingredientQuantityFootprints.module";
 import { IngredientsModule } from "./ingredient/ingredients.module";
-import { IngredientFootprintsModule } from "./ingredientFootprint/ingredientFootprints.module";
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { IngredientFootprintsModule } from "./ingredientFootprint/ingredientFoot
     IngredientsModule,
     FoodProductsModule,
     FoodProductFootprintsModule,
-    IngredientFootprintsModule,
+    IngredientQuantityFootprintsModule,
     AuthModule,
     UsersModule
   ],

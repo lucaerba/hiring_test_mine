@@ -1,17 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Ingredient } from "../ingredient/ingredient.entity";
-import { IngredientsService } from "../ingredient/ingredients.service";
 import { CreateFoodProductDto } from "./dto/create-foodProduct.dto";
 import { FoodProduct } from "./foodProduct.entity";
+import { IngredientQuantitiesService } from "./ingredientQuantity/ingredientQuantities.service";
+
 @Injectable()
 export class FoodProductsService {
 
     constructor(
         @InjectRepository(FoodProduct)
         private foodProductRepository: Repository<FoodProduct>,
-        private ingredientsService: IngredientsService
+        private ingredientQuantitiesService: IngredientQuantitiesService,
     ) { }
 
     findAll(): Promise<FoodProduct[]> {
@@ -27,27 +27,27 @@ export class FoodProductsService {
                 console.log(`FoodProduct for ${foodProduct.name} already exists`);
                 return foodProductExist;
             }
-            if (foodProduct.ingredients.length === 0) {
+            if (foodProduct.ingredientQuantities.length === 0) {
                 console.log(`FoodProduct ${foodProduct.name} has no ingredients`);
                 throw new Error(`FoodProduct ${foodProduct.name} has no ingredients`);
             }
-            const ingredientsPromise = foodProduct.ingredients.map(async (ingredient) => {
-                return this.ingredientsService.save(ingredient);
-            });
-
-            const ingredients = await Promise.all(ingredientsPromise);
-            const validIngredients = ingredients.filter(
-                (ingredient): ingredient is Ingredient => ingredient !== null
+            const validIngredientQuantities = await Promise.all(
+                foodProduct.ingredientQuantities.map(async (ingredientQuantityDto) => {
+                    try {
+                        const ingredientQuantity = await this.ingredientQuantitiesService.save(ingredientQuantityDto);
+                        return ingredientQuantity;
+                    } catch (error) {
+                        console.log(`Error saving ingredientQuantity ${ingredientQuantityDto.ingredient.name}`);
+                        return null;
+                    }
+                })
             );
-
-            if (validIngredients.length !== foodProduct.ingredients.length) {
-                console.log(`Error saving foodProduct ${foodProduct.name}`);
-                throw new Error(`Error saving foodProduct ${foodProduct.name}`);
-            }
 
             const foodProductNew = new FoodProduct({
                 name: foodProduct.name,
-                ingredients: validIngredients,
+                ingredientQuantities: validIngredientQuantities.map((ingredientQuantity) => {
+                    return ingredientQuantity!;
+                }),
             });
 
             return this.foodProductRepository.save(foodProductNew);
@@ -61,7 +61,8 @@ export class FoodProductsService {
         name: string
     ): Promise<FoodProduct | null> {
         return this.foodProductRepository.createQueryBuilder("foodProduct")
-            .leftJoinAndSelect("foodProduct.ingredients", "ingredient")
+            .leftJoinAndSelect("foodProduct.ingredientQuantities", "ingredientQuantity")
+            .leftJoinAndSelect("ingredientQuantity.ingredient", "ingredient")
             .where("foodProduct.name = :name", { name })
             .getOne();
     }

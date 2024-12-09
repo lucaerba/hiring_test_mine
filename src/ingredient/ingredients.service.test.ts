@@ -37,10 +37,22 @@ describe("Ingredient.service", () => {
         await expect(ingredients).toHaveLength(1);
     });
 
+    it("should retrieve existing ingredients", async () => {
+        await ingredientService.save(chickenIngredient);
+        const ingredients = await ingredientService.findAll();
+        await expect(ingredients).toHaveLength(2);
+    });
+
     it("should retrieve an existing ingredient", async () => {
         const savedIngtedien = await ingredientService.save(chickenIngredient);
-        const ingredient = await ingredientService.findOneByNameQuantity(chickenIngredient.name, chickenIngredient.quantity);
+        const ingredient = await ingredientService.save(chickenIngredient);
         await expect(ingredient).toEqual(savedIngtedien);
+    });
+
+    it("should throw an error if ingredient name is empty", async () => {
+        await expect(
+            ingredientService.save({ name: "" })
+        ).rejects.toThrow("Error saving ingredient ");
     });
 });
 

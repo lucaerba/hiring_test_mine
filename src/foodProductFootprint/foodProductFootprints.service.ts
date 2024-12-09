@@ -4,17 +4,17 @@ import { Repository } from "typeorm";
 import { CarbonEmissionFactorsService } from "../carbonEmissionFactor/carbonEmissionFactors.service";
 import { CreateFoodProductDto } from "../foodProduct/dto/create-foodProduct.dto";
 import { FoodProductsService } from "../foodProduct/foodProducts.service";
-import { Ingredient } from "../ingredient/ingredient.entity";
-import { IngredientFootprintsService } from "../ingredientFootprint/ingredientFootprints.service";
 import { CreateFoodProductFootprintDto } from "./dto/create-foodProductFootprint.dto";
 import { FoodProductFootprint } from "./foodProductFootprint.entity";
+import { IngredientQuantityFootprintsService } from "./ingredientQuantityFootprint/ingredientQuantityFootprints.service";
+
 @Injectable()
 export class FoodProductFootprintsService {
     constructor(
         @InjectRepository(FoodProductFootprint)
         private foodProductFootPrintRepository: Repository<FoodProductFootprint>,
         private carbonEmissionFactorsService: CarbonEmissionFactorsService,
-        private ingredientFootPrintsService: IngredientFootprintsService,
+        private ingredientFootPrintsService: IngredientQuantityFootprintsService,
         private foodProductsService: FoodProductsService,
     ) { }
 
@@ -68,17 +68,17 @@ export class FoodProductFootprintsService {
     ): Promise<number> {
         try {
             let score = 0;
-            for (const ingredientDto of foodProduct.ingredients) {
-                const ingredient = new Ingredient(ingredientDto);
-                let ingredientFootPrint = await this.ingredientFootPrintsService.findOneByName(ingredient.name);
+            for (const ingredientQuantityDto of foodProduct.ingredientQuantities) {
+
+                let ingredientFootPrint = await this.ingredientFootPrintsService.findOneByNameQuantity(ingredientQuantityDto);
 
                 if (ingredientFootPrint) {
-                    console.log(`IngredientFootPrint for ${ingredient.name} already exists`);
+                    console.log(`IngredientFootPrint for ${ingredientQuantityDto.ingredient.name} already exists`);
                     score += ingredientFootPrint.score;
                     continue;
                 }
 
-                ingredientFootPrint = await this.ingredientFootPrintsService.computeSaveFootPrint(ingredient);
+                ingredientFootPrint = await this.ingredientFootPrintsService.computeSaveFootPrint(ingredientQuantityDto);
                 score += ingredientFootPrint!.score;
             }
             return score;
@@ -93,7 +93,8 @@ export class FoodProductFootprintsService {
     ): Promise<FoodProductFootprint | null> {
         const foodProductFound = await this.foodProductFootPrintRepository.createQueryBuilder("foodProductFootPrint")
             .leftJoinAndSelect("foodProductFootPrint.foodProduct", "foodProduct")
-            .leftJoinAndSelect("foodProduct.ingredients", "ingredients")
+            .leftJoinAndSelect("foodProduct.ingredientQuantities", "ingredientQuantity")
+            .leftJoinAndSelect("ingredientQuantity.ingredient", "ingredient")
             .where("foodProduct.name = :name", { name })
             .getOne();
 

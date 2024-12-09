@@ -3,17 +3,20 @@ import { CarbonEmissionFactor } from "../carbonEmissionFactor/carbonEmissionFact
 import { CarbonEmissionFactorsService } from "../carbonEmissionFactor/carbonEmissionFactors.service";
 import { FoodProduct } from "../foodProduct/foodProduct.entity";
 import { FoodProductsService } from "../foodProduct/foodProducts.service";
+import { IngredientQuantitiesService } from "../foodProduct/ingredientQuantity/ingredientQuantities.service";
+import { IngredientQuantity } from "../foodProduct/ingredientQuantity/ingredientQuantity.entity";
 import { Ingredient } from "../ingredient/ingredient.entity";
 import { IngredientsService } from "../ingredient/ingredients.service";
-import { IngredientFootprint } from "../ingredientFootprint/ingredientFootprint.entity";
-import { IngredientFootprintsService } from "../ingredientFootprint/ingredientFootprints.service";
-import { getTestEmissionFactor, getTestFoodProduct, getTestIngredient } from "../seed-dev-data";
-import { UnitConverterService } from "../unitConverter/unitConverter.service";
+import { getTestEmissionFactor, getTestFoodProduct, getTestIngredient, getTestIngredientQuantity } from "../seed-dev-data";
 import { FoodProductFootprint } from "./foodProductFootprint.entity";
 import { FoodProductFootprintsService } from "./foodProductFootprints.service";
+import { IngredientQuantityFootprint } from "./ingredientQuantityFootprint/ingredientQuantityFootprint.entity";
+import { IngredientQuantityFootprintsService } from "./ingredientQuantityFootprint/ingredientQuantityFootprints.service";
+import { UnitConverterService } from "./ingredientQuantityFootprint/unitConverter/unitConverter.service";
 
 let ingredientService: IngredientsService;
-let ingredientFootPrintsService: IngredientFootprintsService;
+let ingredientQuantitiesService: IngredientQuantitiesService;
+let ingredientFootPrintsService: IngredientQuantityFootprintsService;
 let foodProductsService: FoodProductsService;
 let foodProductFootPrintsService: FoodProductFootprintsService;
 let carbonEmissionFactorsService: CarbonEmissionFactorsService;
@@ -24,6 +27,11 @@ let savedFlourIngredient: Ingredient | null;
 let savedOliveOilIngredient: Ingredient | null;
 let savedHamIngredient: Ingredient | null;
 
+let savedChickenIngredientQuantity: IngredientQuantity | null;
+let savedFlourIngredientQuantity: IngredientQuantity | null;
+let savedOliveOilIngredientQuantity: IngredientQuantity | null;
+let savedHamIngredientQuantity: IngredientQuantity | null;
+
 let savedChickenPizzaFoodProduct: FoodProduct | null;
 let chickenPizzaFoodProductFootPrint: FoodProductFootprint;
 beforeAll(async () => {
@@ -31,20 +39,24 @@ beforeAll(async () => {
     ingredientService = new IngredientsService(
         dataSource.getRepository(Ingredient)
     );
+    ingredientQuantitiesService = new IngredientQuantitiesService(
+        dataSource.getRepository(IngredientQuantity),
+        ingredientService
+    );
     carbonEmissionFactorsService = new CarbonEmissionFactorsService(
         dataSource.getRepository(CarbonEmissionFactor)
     );
     unitConverterService = new UnitConverterService();
 
-    ingredientFootPrintsService = new IngredientFootprintsService(
-        dataSource.getRepository(IngredientFootprint),
-        ingredientService,
+    ingredientFootPrintsService = new IngredientQuantityFootprintsService(
+        dataSource.getRepository(IngredientQuantityFootprint),
+        ingredientQuantitiesService,
         carbonEmissionFactorsService,
         unitConverterService
     );
     foodProductsService = new FoodProductsService(
         dataSource.getRepository(FoodProduct),
-        ingredientService
+        ingredientQuantitiesService
     );
     foodProductFootPrintsService = new FoodProductFootprintsService(
         dataSource.getRepository(FoodProductFootprint),
@@ -76,7 +88,10 @@ beforeEach(async () => {
             getTestEmissionFactor("chicken"),
             getTestEmissionFactor("beef"),
         ]);
-
+    savedChickenIngredientQuantity = await ingredientQuantitiesService.save(getTestIngredientQuantity(savedChickenIngredient!.name, 1, "kg"));
+    savedFlourIngredientQuantity = await ingredientQuantitiesService.save(getTestIngredientQuantity(savedFlourIngredient!.name, 0.5, "kg"));
+    savedOliveOilIngredientQuantity = await ingredientQuantitiesService.save(getTestIngredientQuantity(savedOliveOilIngredient!.name, 0.3, "kg"));
+    savedHamIngredientQuantity = await ingredientQuantitiesService.save(getTestIngredientQuantity(savedHamIngredient!.name, 0.2, "kg"));
 });
 
 afterAll(async () => {
@@ -87,7 +102,12 @@ describe("FoodProductFootPrints.service", () => {
     it("should save new foodProductFootPrints", async () => {
         const chickenHamPizzaFoodProduct = new FoodProduct({
             name: "chickenHamPizza",
-            ingredients: [savedChickenIngredient!, savedFlourIngredient!, savedOliveOilIngredient!, savedHamIngredient!],
+            ingredientQuantities: [
+                savedChickenIngredientQuantity!,
+                savedFlourIngredientQuantity!,
+                savedOliveOilIngredientQuantity!,
+                savedHamIngredientQuantity!
+            ],
         });
         const savedChickenHamPizza = await foodProductsService.save(chickenHamPizzaFoodProduct);
         if (!savedChickenHamPizza) {
@@ -101,13 +121,12 @@ describe("FoodProductFootPrints.service", () => {
 
         const retrieveChickenHamPizzaFoodProductFootPrint = await dataSource
             .getRepository(FoodProductFootprint)
-            .findOne({ where: { foodProduct: savedChickenHamPizza }, relations: ["foodProduct", "foodProduct.ingredients"] });
+            .findOne({ where: { foodProduct: savedChickenHamPizza }, relations: ["foodProduct", "foodProduct.ingredientQuantities"] });
         expect(retrieveChickenHamPizzaFoodProductFootPrint?.foodProduct).not.toBeNull();
-        expect(retrieveChickenHamPizzaFoodProductFootPrint?.foodProduct.ingredients).toHaveLength(4);
+        expect(retrieveChickenHamPizzaFoodProductFootPrint?.foodProduct.ingredientQuantities).toHaveLength(4);
     });
 
     it("should retrieve foodProductFootPrints", async () => {
-
         const foodProductFootPrints = await foodProductFootPrintsService.findAll();
         expect(foodProductFootPrints).toHaveLength(1);
     });
@@ -115,42 +134,53 @@ describe("FoodProductFootPrints.service", () => {
     it("should retrieve foodProductFootPrints by name", async () => {
         const foodProductFootPrints = await foodProductFootPrintsService.findOneByFoodProductName("chickenPizza");
         expect(foodProductFootPrints).not.toBeNull();
-        expect(foodProductFootPrints?.foodProduct.ingredients).toHaveLength(4);
+        expect(foodProductFootPrints?.foodProduct.ingredientQuantities).toHaveLength(3);
     });
 
     it("should compute and save foodProductFootPrint", async () => {
         const foodProductFootPrint = await foodProductFootPrintsService.computeSaveFootPrint(
             {
                 name: "chickenHamPizza",
-                ingredients: [savedChickenIngredient!, savedFlourIngredient!, savedOliveOilIngredient!, savedHamIngredient!],
+                ingredientQuantities: [
+                    savedChickenIngredientQuantity!,
+                    savedFlourIngredientQuantity!,
+                    savedOliveOilIngredientQuantity!,
+                    savedHamIngredientQuantity!
+                ],
             }
         );
         expect(foodProductFootPrint).not.toBeNull();
-        const chickenContribution = getTestEmissionFactor("chicken").emissionCO2eInKgPerUnit * getTestIngredient("chicken").quantity;
-        const flourContribution = getTestEmissionFactor("flour").emissionCO2eInKgPerUnit * getTestIngredient("flour").quantity;
-        const oliveOilContribution = getTestEmissionFactor("oliveOil").emissionCO2eInKgPerUnit * getTestIngredient("oliveOil").quantity;
-        const hamContribution = getTestEmissionFactor("ham").emissionCO2eInKgPerUnit * getTestIngredient("ham").quantity;
+        const chickenContribution = getTestEmissionFactor("chicken").emissionCO2eInKgPerUnit * getTestIngredientQuantity("chicken", 1, "kg").quantity;
+        const flourContribution = getTestEmissionFactor("flour").emissionCO2eInKgPerUnit * getTestIngredientQuantity("flour", 0.5, "kg").quantity;
+        const oliveOilContribution = getTestEmissionFactor("oliveOil").emissionCO2eInKgPerUnit * getTestIngredientQuantity("oliveOil", 0.3, "kg").quantity;
+        const hamContribution = getTestEmissionFactor("ham").emissionCO2eInKgPerUnit * getTestIngredientQuantity("ham", 0.2, "kg").quantity;
 
         expect(foodProductFootPrint?.score).toBe(chickenContribution + flourContribution + oliveOilContribution + hamContribution);
-
     });
 
     it("should compute foodProductFootPrint score", async () => {
         const score = await foodProductFootPrintsService.computeFootPrint(
             {
                 name: "chickenPizza",
-                ingredients: [savedChickenIngredient!, savedFlourIngredient!, savedOliveOilIngredient!],
+                ingredientQuantities: [
+                    savedChickenIngredientQuantity!,
+                    savedFlourIngredientQuantity!,
+                    savedOliveOilIngredientQuantity!,
+                ],
             }
         );
         expect(score).toBeGreaterThan(0);
     });
 
     it("should handle errors during compute and save operation", async () => {
-
         await expect(foodProductFootPrintsService.computeSaveFootPrint(
             {
                 name: "",
-                ingredients: [savedChickenIngredient!, savedFlourIngredient!, savedOliveOilIngredient!],
+                ingredientQuantities: [
+                    savedChickenIngredientQuantity!,
+                    savedFlourIngredientQuantity!,
+                    savedOliveOilIngredientQuantity!,
+                ],
             }
         )).rejects.toThrow(
             `Error saving foodProductFootPrint `
@@ -161,7 +191,11 @@ describe("FoodProductFootPrints.service", () => {
         const existingFoodProductFootPrint = await foodProductFootPrintsService.computeSaveFootPrint(
             {
                 name: "chickenPizza",
-                ingredients: [savedChickenIngredient!, savedFlourIngredient!, savedOliveOilIngredient!],
+                ingredientQuantities: [
+                    savedChickenIngredientQuantity!,
+                    savedFlourIngredientQuantity!,
+                    savedOliveOilIngredientQuantity!,
+                ],
             }
         );
         expect(existingFoodProductFootPrint).not.toBeNull();
@@ -170,10 +204,15 @@ describe("FoodProductFootPrints.service", () => {
 
     it("should link to existing foodProduct", async () => {
         const beefIngredient = getTestIngredient("beef");
+        const beefIngredientQuantity = getTestIngredientQuantity(beefIngredient.name, 0.5, "kg");
         await dataSource.getRepository(Ingredient).save(beefIngredient);
+        await dataSource.getRepository(IngredientQuantity).save(beefIngredientQuantity);
         const beefBurgerFoodProduct = new FoodProduct({
             name: "beefBurger",
-            ingredients: [beefIngredient, savedOliveOilIngredient!],
+            ingredientQuantities: [
+                beefIngredientQuantity,
+                savedOliveOilIngredientQuantity!,
+            ],
         });
         await dataSource.getRepository(FoodProduct).save(beefBurgerFoodProduct);
 
@@ -182,7 +221,7 @@ describe("FoodProductFootPrints.service", () => {
         );
         expect(foodProductFootPrint).not.toBeNull();
         expect(foodProductFootPrint?.foodProduct.name).toBe("beefBurger");
-        expect(foodProductFootPrint?.foodProduct.ingredients).toHaveLength(2);
+        expect(foodProductFootPrint?.foodProduct.ingredientQuantities).toHaveLength(2);
         expect(foodProductFootPrint?.score).toBeGreaterThan(0);
     });
 
@@ -191,36 +230,41 @@ describe("FoodProductFootPrints.service", () => {
             getTestEmissionFactor("blueCheese"),
             getTestEmissionFactor("vinegar"),
         ]);
-        await dataSource.getRepository(IngredientFootprint).save({
-            ingredient: getTestIngredient("vinegar"),
-            score: 0.5,
-        });
+        await dataSource.getRepository(Ingredient).save([
+            getTestIngredient("blueCheese"),
+        ]);
+        await dataSource.getRepository(IngredientQuantity).save([
+            getTestIngredientQuantity("blueCheese", 0.5, "kg"),
+        ]);
+        await dataSource.getRepository(IngredientQuantityFootprint).save({
+            ingredientQuantity: getTestIngredientQuantity("blueCheese", 0.5, "kg"),
+            score: 1.2,
+        }
+        );
+
         const footprint = await foodProductFootPrintsService.computeSaveFootPrint({
             name: "blueCheeseSalad",
-            ingredients: [
-                { name: "blueCheese", unit: "kg", quantity: 0.5 },
-                { name: "vinegar", unit: "kg", quantity: 0.6 },
-                { name: "oliveOil", unit: "kg", quantity: 0.3 },
+            ingredientQuantities: [
+                getTestIngredientQuantity("blueCheese", 0.5, "kg"),
+                getTestIngredientQuantity("vinegar", 0.5, "kg"),
             ],
         });
         console.log(footprint);
         expect(footprint).not.toBeNull()
         expect(footprint?.foodProduct.name).toBe("blueCheeseSalad");
-        expect(footprint?.foodProduct.ingredients).toHaveLength(3);
+        expect(footprint?.foodProduct.ingredientQuantities).toHaveLength(2);
         expect(footprint?.score).toBe(
-            0.5 * getTestEmissionFactor("blueCheese").emissionCO2eInKgPerUnit +
-            0.5 +
-            0.3 * getTestEmissionFactor("oliveOil").emissionCO2eInKgPerUnit
+            1.2 +
+            getTestEmissionFactor("vinegar").emissionCO2eInKgPerUnit * 0.5
         );
     });
 
     it("should handle errors during compute operation", async () => {
         await expect(foodProductFootPrintsService.computeFootPrint({
             name: "blueCheeseSalad",
-            ingredients: [
-                { name: "", unit: "kg", quantity: 0.5 },
-                { name: "vinegar", unit: "kg", quantity: 0.6 },
-                { name: "oliveOil", unit: "kg", quantity: 0.3 },
+            ingredientQuantities: [
+                getTestIngredientQuantity("vinegar", 0.5, "kg"),
+                getTestIngredientQuantity("blueCheese", 0.5, "kg"),
             ],
         })).rejects.toThrow(
             `Error computing foodProductFootPrint `

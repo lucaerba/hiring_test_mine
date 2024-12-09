@@ -1,6 +1,6 @@
-import { CreateIngredientDto } from "../../ingredient/dto/create-ingredient.dto";
+import { CreateIngredientQuantityDto } from "../ingredientQuantity/dto/create-ingredientQuantity.dto";
 
 export class CreateFoodProductDto {
   name: string;
-  ingredients: CreateIngredientDto[];
+  ingredientQuantities: CreateIngredientQuantityDto[];
 }
