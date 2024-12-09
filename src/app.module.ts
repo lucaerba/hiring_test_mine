@@ -6,6 +6,7 @@ import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./auth/user/users.module";
 import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissionFactors.module";
 import { FoodProductsModule } from "./foodProduct/foodProducts.module";
+import { IngredientQuantitiesModule } from "./foodProduct/ingredientQuantity/ingredientQuantities.module";
 import { FoodProductFootprintsModule } from "./foodProductFootprint/foodProductFootprints.module";
 import { IngredientQuantityFootprintsModule } from "./foodProductFootprint/ingredientQuantityFootprint/ingredientQuantityFootprints.module";
 import { IngredientsModule } from "./ingredient/ingredients.module";
@@ -24,6 +25,7 @@ import { IngredientsModule } from "./ingredient/ingredients.module";
     CarbonEmissionFactorsModule,
     IngredientsModule,
     FoodProductsModule,
+    IngredientQuantitiesModule,
     FoodProductFootprintsModule,
     IngredientQuantityFootprintsModule,
     AuthModule,
